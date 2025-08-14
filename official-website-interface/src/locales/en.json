@@ -1,0 +1,40 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "services": "Services",
+    "contact": "Contact"
+  },
+  "hero": {
+    "title": "Clean. Fast. <span class='text-blue-600'>Modern.</span>",
+    "desc": "A responsive website template built with Vite, Vue 3, and Tailwind CSS.",
+    "getStarted": "Get Started",
+    "learnMore": "Learn More"
+  },
+  "about": {
+    "title": "About Us",
+    "content": "We build modern web experiences with clean design and great performance."
+  },
+  "services": {
+    "title": "Our Services",
+    "web": "Website Design",
+    "frontend": "Frontend Development",
+    "responsive": "Responsive Layout",
+    "performance": "Performance Optimization"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "message": "Have a project in mind? Let's talk!",
+    "email": "Email us at hello{'@'}example.com",
+    "error": {
+      "invalidEmail": "Invalid email address.",
+      "emptyName": "Name cannot be empty.",
+      "emptyEmail": "Email cannot be empty.",
+      "emptyMessage": "Message cannot be empty."
+    }
+  },
+  "footer": {
+    "rights": "All rights reserved.",
+    "links": "Privacy • Terms • Support"
+  }
+}

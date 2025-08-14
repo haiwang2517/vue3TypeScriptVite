@@ -1,0 +1,31 @@
+{
+  "name": "official-website",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview",
+    "format": "prettier --write src/"
+  },
+  "dependencies": {
+    "pinia": "^3.0.3",
+    "vue": "^3.5.18",
+    "vue-i18n": "^9.10.2",
+    "vue-router": "^4.2.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.2.1",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "@vue/tsconfig": "^0.7.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.13",
+    "terser": "^5.43.1",
+    "typescript": "~5.8.3",
+    "vite": "^7.1.2",
+    "vite-plugin-svg-icons": "^2.0.1",
+    "vue-tsc": "^3.0.5"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "nav": {
+    "home": "首页",
+    "about": "关于我们",
+    "services": "服务",
+    "contact": "联系"
+  },
+  "hero": {
+    "title": "简洁。快速。<span class='text-blue-600'>现代。</span>",
+    "desc": "一个使用 Vite、Vue 3 和 Tailwind CSS 构建的响应式网站模板。",
+    "getStarted": "开始使用",
+    "learnMore": "了解更多"
+  },
+  "about": {
+    "title": "关于我们",
+    "content": "我们致力于用简洁设计和卓越性能打造现代网页体验。"
+  },
+  "services": {
+    "title": "我们的服务",
+    "web": "网页设计",
+    "frontend": "前端开发",
+    "responsive": "响应式布局",
+    "performance": "性能优化"
+  },
+  "contact": {
+    "title": "联系我们",
+    "message": "有项目想法？来聊聊吧！",
+    "email": "发送邮件至 hello{'@'}example.com",
+    "error": {
+      "invalidEmail": "错误的邮箱格式。",
+      "emptyName": "名称不能为空。",
+      "emptyEmail": "邮箱不能为空。",
+      "emptyMessage": "邮箱消息内容不能为空。"
+    }
+  },
+  "footer": {
+    "rights": "版权所有。",
+    "links": "隐私 • 条款 • 支持"
+  }
+}
