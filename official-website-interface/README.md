@@ -16,6 +16,10 @@ Learn more about the recommended Project Setup and IDE Support in the [Vue Docs 
 😄[Emoji Url](https://www.unicode.org/emoji/charts/full-emoji-list.html)
 🤣[Emoji Url](https://apps.timwhitlock.info/emoji/tables/unicode#block-1-emoticons)
 
+## Icon
+
+😄[Icon](https://icon-sets.iconify.design/)
+
 ## Env
 
 `VITE_APP_API_BASE_URL` is the backend api url
