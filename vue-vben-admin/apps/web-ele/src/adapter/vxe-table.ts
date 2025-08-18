@@ -1,10 +1,20 @@
 import type { VxeTableGridOptions } from '@vben/plugins/vxe-table';
+import type { Recordable } from '@vben/types';
+
+import type { ComponentType } from './component';
 
 import { h } from 'vue';
 
-import { setupVbenVxeTable, useVbenVxeGrid } from '@vben/plugins/vxe-table';
+import { IconifyIcon } from '@vben/icons';
+import {
+  setupVbenVxeTable,
+  useVbenVxeGrid as useGrid,
+} from '@vben/plugins/vxe-table';
+import { get, isFunction, isString } from '@vben/utils';
 
-import { ElButton, ElImage } from 'element-plus';
+import { ElButton, ElImage, ElPopconfirm, ElSwitch, ElTag } from 'element-plus';
+
+import { $t } from '#/locales';
 
 import { useVbenForm } from './form';
 
@@ -17,17 +27,16 @@ setupVbenVxeTable({
         columnConfig: {
           resizable: true,
         },
-        minHeight: 180,
         formConfig: {
-          // 全局禁用vxe-table的表单配置，使用formOptions
-          enabled: false,
+          enabled: false, // 禁用内置表单
         },
+        minHeight: 180,
         proxyConfig: {
           autoLoad: true,
           response: {
             result: 'items',
             total: 'total',
-            list: 'items',
+            list: '',
           },
           showActiveMsg: true,
           showResponseMsg: false,
@@ -38,33 +47,249 @@ setupVbenVxeTable({
       } as VxeTableGridOptions,
     });
 
-    // 表格配置项可以用 cellRender: { name: 'CellImage' },
+    // 清理热更新时残留的 Cell 渲染器
+    vxeUI.renderer.forEach((_item, key) => {
+      if (key.startsWith('Cell')) {
+        vxeUI.renderer.delete(key);
+      }
+    });
+
+    // === CellImage 渲染器 ===
     vxeUI.renderer.add('CellImage', {
       renderTableDefault(_renderOpts, params) {
         const { column, row } = params;
-        const src = row[column.field];
-        return h(ElImage, { src, previewSrcList: [src] });
+        const src = get(row, column.field);
+        return h(ElImage, {
+          src,
+          fit: 'cover',
+          style: { width: '40px', height: '40px', borderRadius: '4px' },
+          previewSrcList: [src],
+        });
       },
     });
 
-    // 表格配置项可以用 cellRender: { name: 'CellLink' },
+    // === CellLink 渲染器 ===
     vxeUI.renderer.add('CellLink', {
       renderTableDefault(renderOpts) {
-        const { props } = renderOpts;
+        const content = renderOpts.props?.content || ''; // ✅ 改为 content
         return h(
           ElButton,
-          { size: 'small', link: true },
-          { default: () => props?.text },
+          {
+            size: 'small',
+            type: 'primary',
+            link: true,
+          },
+          { default: () => content },
         );
       },
     });
 
-    // 这里可以自行扩展 vxe-table 的全局配置，比如自定义格式化
-    // vxeUI.formats.add
+    // === CellTag 渲染器 ===
+    vxeUI.renderer.add('CellTag', {
+      renderTableDefault({ options, props }, { column, row }) {
+        const value = get(row, column.field);
+        const tagOptions = options ?? [
+          { color: 'success', label: $t('common.enabled'), value: 1 },
+          { color: 'danger', label: $t('common.disabled'), value: 0 },
+        ];
+        const tagItem = tagOptions.find((item) => item.value === value);
+        const { label, ...tagProps } = tagItem || {};
+
+        return h(
+          ElTag,
+          {
+            ...props,
+            ...tagProps,
+            disableTransitions: true,
+          },
+          { default: () => label ?? String(value) },
+        );
+      },
+    });
+
+    // === CellSwitch 渲染器 ===
+    vxeUI.renderer.add('CellSwitch', {
+      renderTableDefault({ attrs, props }, { column, row }) {
+        const loadingKey = `__loading_${column.field}`;
+        const currentValue = get(row, column.field);
+        const finalProps = {
+          ...props,
+          modelValue: currentValue,
+          loading: row[loadingKey] ?? false,
+          'onUpdate:modelValue': async (newVal: boolean | number) => {
+            const beforeChange = attrs?.beforeChange;
+            if (beforeChange && typeof beforeChange === 'function') {
+              const result = await beforeChange(newVal, row);
+              if (result === false) return;
+            }
+            row[loadingKey] = true;
+            try {
+              row[column.field] = newVal;
+            } finally {
+              row[loadingKey] = false;
+            }
+          },
+        };
+
+        return h(ElSwitch, finalProps as Record<string, any>);
+      },
+    });
+
+    // === CellOperation 渲染器 ===
+    vxeUI.renderer.add('CellOperation', {
+      renderTableDefault({ attrs, options, props }, { column, row }) {
+        const alignMap = {
+          left: 'start',
+          center: 'center',
+          right: 'end',
+          default: 'end',
+        } as const;
+
+        type AlignKey = keyof typeof alignMap;
+
+        function getAlign(align?: null | string): string {
+          const key = align as AlignKey;
+          return alignMap[key] ?? alignMap.default;
+        }
+
+        // 使用
+        const justifyContent = getAlign(column.align);
+
+        const defaultBtnProps = {
+          size: 'small',
+          type: 'primary',
+          link: true,
+          ...props,
+        };
+
+        const presets: Recordable<Recordable<any>> = {
+          edit: {
+            content: $t('common.edit'),
+            icon: 'ep:edit',
+          },
+          delete: {
+            content: $t('common.delete'),
+            type: 'danger',
+            icon: 'ep:delete',
+          },
+        };
+
+        const operations: Array<Recordable<any>> = (
+          options || ['edit', 'delete']
+        )
+          .map((opt) => {
+            return isString(opt)
+              ? {
+                  code: opt,
+                  ...presets[opt],
+                  ...defaultBtnProps,
+                }
+              : {
+                  ...defaultBtnProps,
+                  ...presets[opt.code],
+                  ...opt,
+                };
+          })
+          .map((opt) => {
+            const processed: Recordable<any> = {};
+            Object.keys(opt).forEach((key) => {
+              processed[key] = isFunction(opt[key]) ? opt[key](row) : opt[key];
+            });
+            return processed;
+          })
+          .filter((opt) => opt.show !== false);
+
+        function renderButton(opt: Recordable<any>, listen = true) {
+          const { content, text, icon, ...buttonProps } = opt; // ✅ 剔除 text
+
+          return h(
+            ElButton,
+            {
+              ...buttonProps,
+              onClick: listen
+                ? () => attrs?.onClick?.({ code: opt.code, row })
+                : undefined,
+            },
+            {
+              default: () => [
+                icon ? h(IconifyIcon, { icon, class: 'mr-1' }) : null,
+                content || text || '', // ✅ 兼容
+              ],
+            },
+          );
+        }
+
+        function renderConfirm(opt: Recordable<any>) {
+          return h(
+            ElPopconfirm,
+            {
+              confirmButtonText: $t('common.confirm'),
+              cancelButtonText: $t('common.cancel'),
+              icon: h(IconifyIcon, {
+                icon: 'ep:warning',
+                class: 'text-orange-500',
+              }),
+              title: $t('ui.actionTitle.delete', [attrs?.nameTitle || '']),
+              onConfirm: () => {
+                attrs?.onClick?.({
+                  code: opt.code,
+                  row,
+                });
+              },
+              getPopupContainer: (
+                trigger: HTMLElement,
+              ): HTMLElement | ShadowRoot => {
+                const wrapper = trigger.closest<HTMLElement>(
+                  '.vxe-table--viewport-wrapper',
+                );
+                return wrapper || document.body;
+              },
+            },
+            {
+              reference: () => renderButton({ ...opt }, false),
+              default: () =>
+                h(
+                  'span',
+                  { class: 'truncate text-sm' },
+                  $t('ui.actionMessage.deleteConfirm', [
+                    get(row, attrs?.nameField || 'name'),
+                  ]),
+                ),
+            },
+          );
+        }
+
+        const buttons = operations.map((opt) =>
+          opt.code === 'delete' ? renderConfirm(opt) : renderButton(opt),
+        );
+
+        return h(
+          'div',
+          {
+            class: 'flex gap-2',
+            style: { justifyContent },
+          },
+          buttons,
+        );
+      },
+    });
   },
   useVbenForm,
 });
 
-export { useVbenVxeGrid };
+// 导出类型和工具
+export const useVbenVxeGrid = <T extends Record<string, any>>(
+  ...rest: Parameters<typeof useGrid<T, ComponentType>>
+) => useGrid<T, ComponentType>(...rest);
 
-export type * from '@vben/plugins/vxe-table';
+export type OnActionClickParams<T = Recordable<any>> = {
+  code: string;
+  row: T;
+};
+
+export type OnActionClickFn<T = Recordable<any>> = (
+  params: OnActionClickParams<T>,
+) => void;
+
+// 重新导出 vxe-table 相关类型
+export * from '@vben/plugins/vxe-table';

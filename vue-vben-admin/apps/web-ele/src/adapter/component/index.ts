@@ -15,6 +15,12 @@ import { $t } from '@vben/locales';
 
 import { ElNotification } from 'element-plus';
 
+const ElAutoComplete = defineAsyncComponent(() =>
+  Promise.all([
+    import('element-plus/es/components/autocomplete/index'),
+    import('element-plus/es/components/autocomplete/style/css'),
+  ]).then(([res]) => res.ElAutocomplete),
+);
 const ElButton = defineAsyncComponent(() =>
   Promise.all([
     import('element-plus/es/components/button/index'),
@@ -156,6 +162,7 @@ const withDefaultPlaceholder = <T extends Component>(
 export type ComponentType =
   | 'ApiSelect'
   | 'ApiTreeSelect'
+  | 'AutoComplete'
   | 'Checkbox'
   | 'CheckboxGroup'
   | 'DatePicker'
@@ -204,6 +211,7 @@ async function initComponentAdapter() {
         visibleEvent: 'onVisibleChange',
       },
     ),
+    AutoComplete: withDefaultPlaceholder(ElAutoComplete, 'input'),
     Checkbox: ElCheckbox,
     CheckboxGroup: (props, { attrs, slots }) => {
       let defaultSlot;
