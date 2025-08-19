@@ -60,6 +60,7 @@
     "createTime": "Creation Time",
     "operation": "Operation",
     "permissions": "Permissions",
-    "setPermissions": "Permissions"
+    "setPermissions": "Permissions",
+    "changeStatus": "change Status"
   }
 }

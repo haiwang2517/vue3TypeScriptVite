@@ -20,7 +20,10 @@
     "deleting": "Deleting {0} ...",
     "deleteSuccess": "{0} deleted successfully",
     "operationSuccess": "Operation succeeded",
-    "operationFailed": "Operation failed"
+    "operationFailed": "Operation failed",
+    "updateConfirm": "Are you sure to update {0} to {1}?",
+    "updating": "Updating {0} ...",
+    "updateSuccess": "{0} updated successfully"
   },
   "placeholder": {
     "input": "Please enter",

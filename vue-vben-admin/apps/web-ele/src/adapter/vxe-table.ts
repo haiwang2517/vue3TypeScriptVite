@@ -89,8 +89,8 @@ setupVbenVxeTable({
       renderTableDefault({ options, props }, { column, row }) {
         const value = get(row, column.field);
         const tagOptions = options ?? [
-          { color: 'success', label: $t('common.enabled'), value: 1 },
-          { color: 'danger', label: $t('common.disabled'), value: 0 },
+          { type: 'success', label: $t('common.enabled'), value: 1 },
+          { type: 'danger', label: $t('common.disabled'), value: 0 },
         ];
         const tagItem = tagOptions.find((item) => item.value === value);
         const { label, ...tagProps } = tagItem || {};
@@ -109,11 +109,15 @@ setupVbenVxeTable({
 
     // === CellSwitch 渲染器 ===
     vxeUI.renderer.add('CellSwitch', {
-      renderTableDefault({ attrs, props }, { column, row }) {
+      renderTableDefault({ attrs }, { column, row }) {
         const loadingKey = `__loading_${column.field}`;
         const currentValue = get(row, column.field);
         const finalProps = {
-          ...props,
+          activeText: $t('common.enabled'),
+          activeValue: 1,
+          inactiveText: $t('common.disabled'),
+          inactiveValue: 0,
+          inlinePrompt: true,
           modelValue: currentValue,
           loading: row[loadingKey] ?? false,
           'onUpdate:modelValue': async (newVal: boolean | number) => {
@@ -130,7 +134,6 @@ setupVbenVxeTable({
             }
           },
         };
-
         return h(ElSwitch, finalProps as Record<string, any>);
       },
     });
