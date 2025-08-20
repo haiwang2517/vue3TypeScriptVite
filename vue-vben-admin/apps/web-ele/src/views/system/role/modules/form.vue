@@ -1,14 +1,17 @@
 <script lang="ts" setup>
+// import type { DataNode } from 'ant-design-vue/es/tree';
+
+import type { Recordable } from '@vben/types';
+
 import type { SystemRoleApi } from '#/api/system/role';
 
 import { computed, ref } from 'vue';
 
-import { useVbenDrawer } from '@vben/common-ui';
+import { useVbenDrawer, VbenTree } from '@vben/common-ui';
 import { IconifyIcon } from '@vben/icons';
 
-// 🔄 替换为 Element Plus 组件
-import { ElScrollbar, ElTree } from 'element-plus';
-
+// // 🔄 替换为 Element Plus 组件
+// import { Node } from 'element-plus';
 import { useVbenForm } from '#/adapter/form';
 import { getMenuList } from '#/api/system/menu';
 import { createRole, updateRole } from '#/api/system/role';
@@ -25,7 +28,7 @@ const [Form, formApi] = useVbenForm({
   showDefaultActions: false,
 });
 
-// 🔄 Element Plus 的 Tree 节点格式
+// // 🔄 Element Plus 的 Tree 节点格式
 type MetaType = 'button' | 'menu' | 'route';
 interface ElTreeNode {
   id: number | string;
@@ -39,10 +42,6 @@ interface ElTreeNode {
   };
 }
 
-interface ElTreeCheckedNode {
-  checkedKeys: any[];
-  checkedNodes?: ElTreeNode[];
-}
 const permissions = ref<ElTreeNode[]>([]);
 const loadingPermissions = ref(false);
 
@@ -69,7 +68,9 @@ const [Drawer, drawerApi] = useVbenDrawer({
       if (data) {
         formData.value = data;
         id.value = data.id;
-        formApi.setValues(data);
+        setTimeout(() => {
+          formApi.setValues(data);
+        }, 300);
       } else {
         id.value = undefined;
       }
@@ -85,28 +86,10 @@ async function loadPermissions() {
   loadingPermissions.value = true;
   try {
     const res = await getMenuList();
-    // 🔁 转换数据结构以适配 ElTree
-    permissions.value = res.map((item: any) => ({
-      id: item.id,
-      label: $t(item.meta?.title || ''),
-      icon: item.meta?.icon,
-      children: item.children ? convertChildren(item.children) : undefined,
-      meta: item.meta,
-    }));
+    permissions.value = res as unknown as ElTreeNode[];
   } finally {
     loadingPermissions.value = false;
   }
-}
-
-// 递归转换子节点
-function convertChildren(children: any[]): ElTreeNode[] {
-  return children.map((item) => ({
-    id: item.id,
-    label: $t(item.meta?.title || ''),
-    icon: item.meta?.icon,
-    children: item.children ? convertChildren(item.children) : undefined,
-    meta: item.meta,
-  }));
 }
 
 const getDrawerTitle = computed(() => {
@@ -114,33 +97,17 @@ const getDrawerTitle = computed(() => {
     ? $t('common.edit', [$t('system.role.name')])
     : $t('common.create', [$t('system.role.name')]);
 });
-const defaultCheckedKeys = computed(() => {
-  // 如果是编辑模式，并且 formData 存在，返回它的 menuIds
-  if (
-    formData.value?.permissions &&
-    Array.isArray(formData.value.permissions)
-  ) {
-    return formData.value.permissions;
-  }
-  return [];
-});
-// 自定义节点类（Element Plus 用 class-name）
-function getNodeClass(node: { data: ElTreeNode }) {
+
+function getNodeClass(node: Recordable<any>) {
   const classes: string[] = [];
-  if (node.data.meta?.type === 'button') {
+  if (node.value?.type === 'button') {
     classes.push('inline-flex');
-    // 示例逻辑，可按需调整
-    // Element Plus 不支持 index，需在数据中添加索引字段
+    if (node.index % 3 >= 1) {
+      classes.push('!pl-0');
+    }
   }
+
   return classes.join(' ');
-}
-function handlePermissionsChange(
-  currentItem: ElTreeNode,
-  checkedItem: ElTreeCheckedNode,
-) {
-  formApi.setValues({
-    permissions: checkedItem.checkedKeys,
-  });
 }
 </script>
 
@@ -155,33 +122,22 @@ function handlePermissionsChange(
           style="min-height: 200px"
         >
           <!-- 🔄 使用 ElTree -->
-          <ElScrollbar max-height="500px">
-            <ElTree
-              node-key="id"
-              :data="permissions"
-              :props="{
-                label: 'label',
-                children: 'children',
-                icon: 'icon',
-              }"
-              :default-checked-keys="defaultCheckedKeys"
-              :default-expanded-level="2"
-              :class-name="getNodeClass"
-              v-bind="slotProps"
-              highlight-current
-              show-checkbox
-              :expand-on-click-node="false"
-              @check="handlePermissionsChange"
-            >
-              <!-- 自定义节点内容 -->
-              <template #default="{ data }">
-                <div class="flex items-center gap-1">
-                  <IconifyIcon v-if="data.meta?.icon" :icon="data.meta.icon" />
-                  <span>{{ $t(data.meta?.title) }}</span>
-                </div>
-              </template>
-            </ElTree>
-          </ElScrollbar>
+          <VbenTree
+            :tree-data="permissions"
+            multiple
+            bordered
+            :default-expanded-level="2"
+            :get-node-class="getNodeClass"
+            v-bind="slotProps"
+            value-field="id"
+            label-field="meta.title"
+            icon-field="meta.icon"
+          >
+            <template #node="{ value }">
+              <IconifyIcon v-if="value.meta.icon" :icon="value.meta.icon" />
+              {{ $t(value.meta.title) }}
+            </template>
+          </VbenTree>
         </div>
       </template>
     </Form>

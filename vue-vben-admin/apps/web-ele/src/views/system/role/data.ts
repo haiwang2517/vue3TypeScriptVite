@@ -36,10 +36,11 @@ export function useFormSchema(): VbenFormSchema[] {
       },
     },
     {
-      component: 'Tree',
+      component: 'Input',
       fieldName: 'permissions',
       formItemClass: 'items-start',
       label: $t('system.role.setPermissions'),
+      modelPropName: 'modelValue',
     },
   ];
 }
