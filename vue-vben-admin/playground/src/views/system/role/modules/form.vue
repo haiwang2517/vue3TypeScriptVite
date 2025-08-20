@@ -51,16 +51,17 @@ const [Drawer, drawerApi] = useVbenDrawer({
     if (isOpen) {
       const data = drawerApi.getData<SystemRoleApi.SystemRole>();
       formApi.resetForm();
+      if (permissions.value.length === 0) {
+        loadPermissions();
+      }
       if (data) {
         formData.value = data;
         id.value = data.id;
-        formApi.setValues(data);
+        setTimeout(() => {
+          formApi.setValues(data);
+        }, 300);
       } else {
         id.value = undefined;
-      }
-
-      if (permissions.value.length === 0) {
-        loadPermissions();
       }
     }
   },

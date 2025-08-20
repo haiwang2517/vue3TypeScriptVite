@@ -30,6 +30,8 @@ async function initSetupVbenForm() {
         DatePicker: 'modelValue',
         TimePicker: 'modelValue',
         Cascader: 'modelValue',
+        TreeSelect: 'modelValue',
+        Tree: 'modelValue',
       },
     },
     defineRules: {

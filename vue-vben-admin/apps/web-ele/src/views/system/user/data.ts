@@ -8,9 +8,18 @@ export function useFormSchema(): VbenFormSchema[] {
   return [
     {
       component: 'Input',
-      fieldName: 'name',
-      label: $t('system.role.roleName'),
+      fieldName: 'realName',
+      label: $t('system.user.realName'),
       rules: 'required',
+    },
+    {
+      component: 'Input',
+      fieldName: 'userName',
+      label: $t('system.user.userName'),
+      componentProps: {
+        disabled: true,
+        placeholder: '',
+      },
     },
     {
       component: 'RadioGroup',
@@ -25,22 +34,9 @@ export function useFormSchema(): VbenFormSchema[] {
       },
       defaultValue: 1,
       fieldName: 'status',
-      label: $t('system.role.status'),
+      label: $t('system.user.status'),
     },
-    {
-      component: 'Input',
-      fieldName: 'remark',
-      label: $t('system.role.remark'),
-      componentProps: {
-        type: 'textarea', // 覆盖默认的 textarea
-      },
-    },
-    {
-      component: 'Tree',
-      fieldName: 'permissions',
-      formItemClass: 'items-start',
-      label: $t('system.role.setPermissions'),
-    },
+    // 选择部门/选择角色
   ];
 }
 
@@ -48,10 +44,32 @@ export function useGridFormSchema(): VbenFormSchema[] {
   return [
     {
       component: 'Input',
-      fieldName: 'name',
-      label: $t('system.role.roleName'),
+      fieldName: 'userName',
+      label: $t('system.user.userName'),
     },
-    { component: 'Input', fieldName: 'id', label: $t('system.role.id') },
+    {
+      component: 'Input',
+      fieldName: 'realName',
+      label: $t('system.user.realName'),
+    },
+    {
+      component: 'Select',
+      fieldName: 'department',
+      label: $t('system.user.department'),
+      componentProps: {
+        allowClear: true,
+        options: [],
+      },
+    },
+    {
+      component: 'Select',
+      fieldName: 'role',
+      label: $t('system.user.role'),
+      componentProps: {
+        allowClear: true,
+        options: [],
+      },
+    },
     {
       component: 'Select',
       componentProps: {
@@ -62,17 +80,12 @@ export function useGridFormSchema(): VbenFormSchema[] {
         ],
       },
       fieldName: 'status',
-      label: $t('system.role.status'),
-    },
-    {
-      component: 'Input',
-      fieldName: 'remark',
-      label: $t('system.role.remark'),
+      label: $t('system.user.status'),
     },
     {
       component: 'DatePicker',
       fieldName: 'createTime',
-      label: $t('system.role.createTime'),
+      label: $t('system.user.createTime'),
       componentProps: {
         type: 'daterange',
         format: 'YYYY-MM-DD',
@@ -87,13 +100,18 @@ export function useColumns<T = SystemRoleApi.SystemRole>(
 ): VxeTableGridOptions['columns'] {
   return [
     {
-      field: 'name',
-      title: $t('system.role.roleName'),
+      field: 'id',
+      title: $t('system.user.id'),
       width: 200,
     },
     {
-      field: 'id',
-      title: $t('system.role.id'),
+      field: 'userName',
+      title: $t('system.user.userName'),
+      width: 200,
+    },
+    {
+      field: 'realName',
+      title: $t('system.user.realName'),
       width: 200,
     },
     {
@@ -102,17 +120,12 @@ export function useColumns<T = SystemRoleApi.SystemRole>(
         name: onStatusChange ? 'CellSwitch' : 'CellTag',
       },
       field: 'status',
-      title: $t('system.role.status'),
+      title: $t('system.user.status'),
       width: 100,
     },
     {
-      field: 'remark',
-      minWidth: 100,
-      title: $t('system.role.remark'),
-    },
-    {
       field: 'createTime',
-      title: $t('system.role.createTime'),
+      title: $t('system.user.createTime'),
       width: 200,
     },
     {
@@ -120,14 +133,14 @@ export function useColumns<T = SystemRoleApi.SystemRole>(
       cellRender: {
         attrs: {
           nameField: 'name',
-          nameTitle: $t('system.role.name'),
+          nameTitle: $t('system.user.name'),
           onClick: onActionClick,
         },
         name: 'CellOperation',
       },
       field: 'operation',
       fixed: 'right',
-      title: $t('system.role.operation'),
+      title: $t('system.user.operation'),
       width: 130,
     },
   ];

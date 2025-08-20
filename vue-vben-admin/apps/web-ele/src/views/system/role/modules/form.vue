@@ -39,6 +39,10 @@ interface ElTreeNode {
   };
 }
 
+interface ElTreeCheckedNode {
+  checkedKeys: any[];
+  checkedNodes?: ElTreeNode[];
+}
 const permissions = ref<ElTreeNode[]>([]);
 const loadingPermissions = ref(false);
 
@@ -110,7 +114,16 @@ const getDrawerTitle = computed(() => {
     ? $t('common.edit', [$t('system.role.name')])
     : $t('common.create', [$t('system.role.name')]);
 });
-
+const defaultCheckedKeys = computed(() => {
+  // 如果是编辑模式，并且 formData 存在，返回它的 menuIds
+  if (
+    formData.value?.permissions &&
+    Array.isArray(formData.value.permissions)
+  ) {
+    return formData.value.permissions;
+  }
+  return [];
+});
 // 自定义节点类（Element Plus 用 class-name）
 function getNodeClass(node: { data: ElTreeNode }) {
   const classes: string[] = [];
@@ -120,6 +133,14 @@ function getNodeClass(node: { data: ElTreeNode }) {
     // Element Plus 不支持 index，需在数据中添加索引字段
   }
   return classes.join(' ');
+}
+function handlePermissionsChange(
+  currentItem: ElTreeNode,
+  checkedItem: ElTreeCheckedNode,
+) {
+  formApi.setValues({
+    permissions: checkedItem.checkedKeys,
+  });
 }
 </script>
 
@@ -143,13 +164,14 @@ function getNodeClass(node: { data: ElTreeNode }) {
                 children: 'children',
                 icon: 'icon',
               }"
-              :default-expanded-keys="[]"
+              :default-checked-keys="defaultCheckedKeys"
               :default-expanded-level="2"
               :class-name="getNodeClass"
               v-bind="slotProps"
               highlight-current
               show-checkbox
               :expand-on-click-node="false"
+              @check="handlePermissionsChange"
             >
               <!-- 自定义节点内容 -->
               <template #default="{ data }">

@@ -20,6 +20,7 @@ const props = withDefaults(defineProps<TreeProps>(), {
   autoCheckParent: true,
   bordered: false,
   checkStrictly: false,
+  defaultCheckedKeys: () => [],
   defaultExpandedKeys: () => [],
   defaultExpandedLevel: 0,
   disabled: false,
@@ -201,6 +202,7 @@ function onSelect(item: FlattenedItem<Recordable<any>>, isSelected: boolean) {
         }
       });
   }
+  console.warn('select', item);
   updateTreeValue();
   emits('select', item);
 }
@@ -265,6 +267,7 @@ defineExpose({
         "
         @select="
           (event: any) => {
+            console.warn('select event', event);
             if (isNodeDisabled(item)) {
               event.preventDefault();
               event.stopPropagation();

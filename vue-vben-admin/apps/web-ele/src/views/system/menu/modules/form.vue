@@ -37,6 +37,8 @@ const schema: VbenFormSchema[] = [
       buttonStyle: 'solid',
       options: getMenuTypeOptions(),
       optionType: 'button',
+      // TODO 设置button样式
+      isButton: true,
     },
     defaultValue: 'menu',
     fieldName: 'type',

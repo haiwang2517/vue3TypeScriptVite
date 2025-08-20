@@ -1,3 +1,12 @@
+export interface User {
+  id: number;
+  userName: string;
+  realName: string;
+  roles: string[];
+  createTime: string;
+  status: 0 | 1;
+}
+
 export interface UserInfo {
   id: number;
   password: string;
@@ -186,6 +195,7 @@ export const MOCK_MENUS = [
   },
 ];
 
+export const MOCK_ROLE_LIST = ['Admin', 'User'];
 export const MOCK_MENU_LIST = [
   {
     id: 1,

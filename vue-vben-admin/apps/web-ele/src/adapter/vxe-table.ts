@@ -183,9 +183,9 @@ setupVbenVxeTable({
           .map((opt) => {
             return isString(opt)
               ? {
-                  code: opt,
-                  ...presets[opt],
                   ...defaultBtnProps,
+                  ...presets[opt],
+                  code: opt,
                 }
               : {
                   ...defaultBtnProps,
